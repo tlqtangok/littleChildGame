@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Screen, GameState, Direction, Position } from './types';
 import { generateFriendlyExplanation, speakText, generateRewardSticker } from './services/geminiService';
+import { unlockAudioContext } from './services/audioUtils';
 import GameGrid from './components/GameGrid';
 import { 
   Play, 
@@ -133,6 +134,7 @@ const App: React.FC = () => {
   // --- Story / Teacher Logic ---
 
   const handleStartStory = async () => {
+    unlockAudioContext(); // Important for iOS Safari
     setCurrentScreen(Screen.STORY);
     // Ask for explanation of "computer program" in Chinese
     const text = await generateFriendlyExplanation("计算机程序");
@@ -241,7 +243,7 @@ const App: React.FC = () => {
   // --- Render Helpers ---
 
   const renderHome = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center space-y-8 bg-gradient-to-b from-pink-100 to-purple-200">
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 text-center space-y-8 bg-gradient-to-b from-pink-100 to-purple-200">
       <div className="bg-white p-6 rounded-[2rem] shadow-xl">
         <BotIcon className="w-24 h-24 text-purple-500 mx-auto mb-4 animate-bounce-gentle" />
         <h1 className="text-4xl md:text-6xl font-black text-purple-600 mb-2">闪闪编程</h1>
@@ -257,7 +259,10 @@ const App: React.FC = () => {
           </button>
 
           <button 
-            onClick={() => setCurrentScreen(Screen.LEVEL_SELECT)}
+            onClick={() => {
+              unlockAudioContext(); // Important for iOS Safari
+              setCurrentScreen(Screen.LEVEL_SELECT);
+            }}
             className="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 text-xl font-bold py-4 px-12 rounded-full shadow-[0_6px_0_rgb(202,138,4)] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-3"
           >
             <LayoutGrid size={24} /> 选择关卡
@@ -267,7 +272,7 @@ const App: React.FC = () => {
   );
 
   const renderStory = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-yellow-50">
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 bg-yellow-50">
       <div className="max-w-2xl bg-white p-8 rounded-[3rem] shadow-2xl border-8 border-yellow-200 relative">
         <button 
            onClick={() => setCurrentScreen(Screen.HOME)} 
@@ -307,7 +312,7 @@ const App: React.FC = () => {
   );
 
   const renderLevelSelect = () => (
-    <div className="min-h-screen bg-blue-50 flex flex-col items-center p-6">
+    <div className="min-h-[100dvh] bg-blue-50 flex flex-col items-center p-6">
       <div className="w-full max-w-4xl flex justify-between items-center mb-8">
          <button 
            onClick={() => setCurrentScreen(Screen.HOME)}
@@ -361,7 +366,7 @@ const App: React.FC = () => {
   );
 
   const renderGame = () => (
-    <div className="min-h-screen bg-blue-50 flex flex-col items-center p-4">
+    <div className="min-h-[100dvh] bg-blue-50 flex flex-col items-center p-4">
       {/* Header */}
       <div className="w-full max-w-4xl flex justify-between items-center mb-6 mt-4">
         <button onClick={() => {
@@ -447,7 +452,7 @@ const App: React.FC = () => {
   );
 
   const renderReward = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-to-tr from-purple-400 to-pink-500">
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 bg-gradient-to-tr from-purple-400 to-pink-500">
        <div className="bg-white p-8 rounded-[3rem] shadow-2xl text-center max-w-md w-full animate-bounce-gentle">
           <h2 className="text-4xl font-black text-pink-500 mb-2">太棒了！</h2>
           <p className="text-gray-500 text-lg mb-6">你完成了所有关卡！</p>

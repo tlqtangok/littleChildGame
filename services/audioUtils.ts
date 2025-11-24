@@ -31,11 +31,26 @@ let audioContext: AudioContext | null = null;
 
 export const getAudioContext = () => {
   if (!audioContext) {
-    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
-      sampleRate: 24000, 
-    });
+    // Remove sampleRate config to be safe on iOS Safari which requires hardware-matched rate
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    audioContext = new AudioContextClass();
   }
   return audioContext;
+};
+
+// iOS Safari requires audio context to be resumed inside a user gesture (click/touch)
+// This function should be called on the first "Start" button click.
+export const unlockAudioContext = () => {
+  const ctx = getAudioContext();
+  if (ctx.state === 'suspended') {
+    ctx.resume();
+  }
+  // Play a tiny silent buffer to ensure the audio engine is fully engaged
+  const buffer = ctx.createBuffer(1, 1, 22050);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+  source.start(0);
 };
 
 export const playAudioBuffer = (buffer: AudioBuffer) => {
