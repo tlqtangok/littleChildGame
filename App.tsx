@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Screen, GameState, Direction, Position } from './types';
 import { generateFriendlyExplanation, speakText, generateRewardSticker } from './services/geminiService';
-import { unlockAudioContext } from './services/audioUtils';
+import { 
+  unlockAudioContext, 
+  playClickSound, 
+  playStepSound, 
+  playBonkSound, 
+  playWinSound, 
+  playDeleteSound,
+  playVictorySound
+} from './services/audioUtils';
 import GameGrid from './components/GameGrid';
 import { 
   Play, 
@@ -14,103 +22,131 @@ import {
   Volume2,
   Trophy,
   LayoutGrid,
-  Home
+  Home,
+  Github
 } from 'lucide-react';
 
-// --- Level Definitions (Fixed & Verified) ---
+// --- Level Definitions (30 Levels Sorted by Difficulty) ---
 
 const LEVELS: GameState[] = [
-  // Level 1: 直走 (Simple Right)
-  {
-    gridSize: 4,
-    playerPos: { x: 0, y: 1 },
-    goalPos: { x: 3, y: 1 },
-    obstacles: [],
-  },
-  // Level 2: 转个弯 (Down and Right) - Fixed: Removed blocking obstacle
-  {
-    gridSize: 4,
-    playerPos: { x: 0, y: 0 },
-    goalPos: { x: 2, y: 2 },
-    obstacles: [{ x: 1, y: 0 }, { x: 3, y: 0 }, { x: 0, y: 2 }],
-  },
-  // Level 3: 绕过石头 (Avoid the rock)
-  {
-    gridSize: 4,
-    playerPos: { x: 0, y: 2 },
-    goalPos: { x: 3, y: 2 },
-    obstacles: [{ x: 1, y: 2 }],
-  },
-  // Level 4: 爬楼梯 (Stairs)
-  {
-    gridSize: 4,
-    playerPos: { x: 0, y: 3 },
-    goalPos: { x: 3, y: 0 },
-    obstacles: [
-      { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 },
-      { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 },
-    ],
-  },
-  // Level 5: U型弯 (The U-Turn)
-  {
-    gridSize: 4,
-    playerPos: { x: 0, y: 0 },
-    goalPos: { x: 0, y: 2 },
-    obstacles: [{ x: 1, y: 0 }, { x: 1, y: 1 }, { x: 1, y: 2 }],
-  },
-  // Level 6: 穿过森林 (Through the forest) - 5x5 Start
-  {
-    gridSize: 5,
-    playerPos: { x: 2, y: 0 },
-    goalPos: { x: 2, y: 4 },
-    obstacles: [{ x: 1, y: 2 }, { x: 3, y: 2 }, { x: 0, y: 4 }, { x: 4, y: 4 }],
-  },
-  // Level 7: 螺旋 (Spiral)
-  {
-    gridSize: 5,
-    playerPos: { x: 0, y: 0 },
-    goalPos: { x: 2, y: 2 },
-    obstacles: [
-      { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 },
-      { x: 4, y: 1 }, { x: 4, y: 2 }, { x: 4, y: 3 }, { x: 4, y: 4 },
-      { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 },
-      { x: 0, y: 3 }, { x: 0, y: 2 },
-      { x: 2, y: 1 } // Inner block
-    ],
-  },
-  // Level 8: 双房间 (Two Rooms)
-  {
-    gridSize: 5,
-    playerPos: { x: 0, y: 2 },
-    goalPos: { x: 4, y: 2 },
-    obstacles: [
-      { x: 2, y: 0 }, { x: 2, y: 1 }, { x: 2, y: 3 }, { x: 2, y: 4 }
-      // Gap at 2,2
-    ],
-  },
-  // Level 9: 迷宫 (The Maze)
-  {
-    gridSize: 5,
-    playerPos: { x: 0, y: 0 },
-    goalPos: { x: 4, y: 4 },
-    obstacles: [
-      { x: 1, y: 0 }, { x: 1, y: 1 },
-      { x: 3, y: 1 }, { x: 3, y: 2 }, { x: 3, y: 3 },
-      { x: 1, y: 3 }, { x: 1, y: 4 }
-    ],
-  },
-  // Level 10: 终极大挑战 (Grand Finale)
-  {
-    gridSize: 5,
-    playerPos: { x: 0, y: 0 },
-    goalPos: { x: 4, y: 0 },
-    obstacles: [
-      { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 },
-      { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 },
-      { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 3, y: 4 }
-    ],
-  },
+  // --- STAGE 1: VERY EASY (4x4 Grid, Short Paths) ---
+  
+  // Level 1: Just go right (Introduction)
+  { gridSize: 4, playerPos: { x: 0, y: 1 }, goalPos: { x: 3, y: 1 }, obstacles: [] },
+  
+  // Level 2: Just go down
+  { gridSize: 4, playerPos: { x: 1, y: 0 }, goalPos: { x: 1, y: 3 }, obstacles: [{ x: 0, y: 1 }, { x: 2, y: 2 }] },
+  
+  // Level 3: One simple turn (L-shape)
+  { gridSize: 4, playerPos: { x: 0, y: 0 }, goalPos: { x: 2, y: 2 }, obstacles: [{ x: 1, y: 0 }, { x: 2, y: 0 }] },
+  
+  // Level 4: Simple Dodge (Up and Over)
+  { gridSize: 4, playerPos: { x: 0, y: 2 }, goalPos: { x: 3, y: 2 }, obstacles: [{ x: 1, y: 2 }, { x: 1, y: 3 }] },
+  
+  // Level 5: The "Stairs" (Right, Down, Right, Down)
+  { gridSize: 4, playerPos: { x: 0, y: 0 }, goalPos: { x: 2, y: 2 }, obstacles: [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: 2, y: 1 }] },
+
+  // --- STAGE 2: EASY (5x5 Grid, More Space) ---
+
+  // Level 6: Long Straight Walk (Introduction to 5x5)
+  { gridSize: 5, playerPos: { x: 0, y: 2 }, goalPos: { x: 4, y: 2 }, obstacles: [{ x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }] },
+  
+  // Level 7: Go Around the Block
+  { gridSize: 5, playerPos: { x: 2, y: 0 }, goalPos: { x: 2, y: 4 }, obstacles: [{ x: 2, y: 2 }, { x: 1, y: 2 }, { x: 3, y: 2 }] },
+  
+  // Level 8: The Tunnel (Straight but constrained)
+  { gridSize: 5, playerPos: { x: 0, y: 2 }, goalPos: { x: 4, y: 2 }, obstacles: [{x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:1,y:3}, {x:2,y:3}, {x:3,y:3}] },
+  
+  // Level 9: Big U-Turn (Down, Right, Up)
+  { gridSize: 5, playerPos: { x: 0, y: 0 }, goalPos: { x: 4, y: 0 }, obstacles: [{x:1,y:0}, {x:2,y:0}, {x:3,y:0}, {x:1,y:2}, {x:2,y:2}, {x:3,y:2}] },
+  
+  // Level 10: Simple Zig Zag
+  { gridSize: 5, playerPos: { x: 1, y: 0 }, goalPos: { x: 3, y: 4 }, obstacles: [{x:2,y:0}, {x:2,y:1}, {x:2,y:3}, {x:2,y:4}] },
+
+  // --- STAGE 3: MEDIUM (Complex Turns) ---
+
+  // Level 11: Pillars (Weave through)
+  { gridSize: 5, playerPos: { x: 0, y: 2 }, goalPos: { x: 4, y: 2 }, obstacles: [{x:1,y:1}, {x:1,y:3}, {x:3,y:1}, {x:3,y:3}] },
+  
+  // Level 12: The Snake (Winding Path)
+  { gridSize: 5, playerPos: { x: 0, y: 0 }, goalPos: { x: 4, y: 0 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:3,y:0}] },
+  
+  // Level 13: Two Walls (Go Up and Down)
+  { gridSize: 5, playerPos: { x: 0, y: 0 }, goalPos: { x: 4, y: 0 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:3,y:4}, {x:3,y:3}, {x:3,y:2}] },
+  
+  // Level 14: Zig Zag Up
+  { gridSize: 5, playerPos: { x: 2, y: 4 }, goalPos: { x: 2, y: 0 }, obstacles: [{x:2,y:3}, {x:1,y:3}, {x:1,y:2}, {x:3,y:2}, {x:3,y:1}, {x:2,y:1}] },
+  
+  // Level 15: Corner to Corner
+  { gridSize: 5, playerPos: { x: 0, y: 4 }, goalPos: { x: 4, y: 0 }, obstacles: [{x:0,y:3}, {x:1,y:3}, {x:2,y:3}, {x:2,y:2}, {x:2,y:1}, {x:3,y:1}] },
+
+  // --- STAGE 4: HARD (Longer Paths) ---
+
+  // Level 16: The Maze Begins
+  { gridSize: 5, playerPos: { x: 2, y: 2 }, goalPos: { x: 4, y: 4 }, obstacles: [{x:3,y:3}, {x:3,y:2}, {x:2,y:3}, {x:1,y:2}, {x:2,y:1}] },
+  
+  // Level 17: Escape the Box
+  { gridSize: 5, playerPos: { x: 2, y: 2 }, goalPos: { x: 0, y: 0 }, obstacles: [{x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:3,y:2}, {x:3,y:3}, {x:2,y:3}, {x:1,y:3}] }, 
+  
+  // Level 18: Wide 6x6 Diagonal
+  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 5, y: 5 }, obstacles: [{x:1,y:0}, {x:2,y:1}, {x:3,y:2}, {x:4,y:3}, {x:5,y:4}] },
+  
+  // Level 19: Long Way Around (6x6)
+  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 0, y: 1 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:1,y:3}, {x:1,y:4}, {x:1,y:5}, {x:3,y:0}, {x:3,y:1}, {x:3,y:2}, {x:3,y:3}, {x:3,y:4}, {x:3,y:5}, {x:5,y:0}, {x:5,y:1}] },
+  
+  // Level 20: Divide (Choose your path)
+  { gridSize: 6, playerPos: { x: 2, y: 5 }, goalPos: { x: 3, y: 0 }, obstacles: [{x:2,y:4}, {x:3,y:4}, {x:2,y:3}, {x:3,y:3}, {x:2,y:2}, {x:3,y:2}] },
+
+  // --- STAGE 5: EXPERT (6x6 Complex) ---
+
+  // Level 21: Scatter
+  { gridSize: 6, playerPos: { x: 0, y: 2 }, goalPos: { x: 5, y: 3 }, obstacles: [{x:2,y:2}, {x:3,y:3}, {x:2,y:3}, {x:3,y:2}] },
+  
+  // Level 22: Tight Spin (6x6)
+  { gridSize: 6, playerPos: { x: 2, y: 3 }, goalPos: { x: 3, y: 2 }, obstacles: [{x:2,y:2}, {x:3,y:3}, {x:1,y:3}, {x:4,y:2}, {x:2,y:4}, {x:3,y:1}] },
+  
+  // Level 23: The Big Snake
+  { gridSize: 6, playerPos: { x: 0, y: 5 }, goalPos: { x: 5, y: 0 }, obstacles: [{x:1,y:5}, {x:1,y:4}, {x:1,y:3}, {x:3,y:3}, {x:3,y:2}, {x:3,y:1}, {x:5,y:1}] },
+  
+  // Level 24: Spiral In
+  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 3, y: 3 }, obstacles: [{x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:4,y:1}, {x:4,y:2}, {x:4,y:3}, {x:4,y:4}, {x:2,y:3}] },
+  
+  // Level 25: Corner Maze
+  { gridSize: 6, playerPos: { x: 5, y: 5 }, goalPos: { x: 0, y: 0 }, obstacles: [{x:4,y:4}, {x:5,y:4}, {x:2,y:2}, {x:3,y:2}, {x:2,y:3}, {x:3,y:3}, {x:0,y:1}, {x:1,y:1}, {x:1,y:0}] },
+  
+  // Level 26: Stripes
+  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 5, y: 5 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:1,y:3}, {x:1,y:4}, {x:3,y:5}, {x:3,y:4}, {x:3,y:3}, {x:3,y:2}, {x:3,y:1}] },
+  
+  // Level 27: The Hurdles
+  { gridSize: 6, playerPos: { x: 0, y: 5 }, goalPos: { x: 5, y: 5 }, obstacles: [{x:1,y:5}, {x:2,y:4}, {x:3,y:5}, {x:4,y:4}, {x:5,y:3}, {x:5,y:4}] },
+  
+  // Level 28: Around the World
+  { gridSize: 6, playerPos: { x: 2, y: 2 }, goalPos: { x: 3, y: 3 }, obstacles: [{x:2,y:3}, {x:3,y:2}, {x:1,y:1}, {x:4,y:4}, {x:1,y:4}, {x:4,y:1}] },
+
+  // Level 29: Final Test A
+  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 5, y: 0 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:3,y:5}, {x:3,y:4}, {x:3,y:3}, {x:5,y:2}, {x:5,y:1}] },
+
+  // Level 30: The Grand Spiral (Challenge)
+  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 3, y: 3 }, obstacles: [
+    {x:1,y:0}, {x:2,y:0}, {x:3,y:0}, {x:4,y:0}, {x:5,y:0}, 
+    {x:5,y:1}, {x:5,y:2}, {x:5,y:3}, {x:5,y:4}, {x:5,y:5}, 
+    {x:4,y:5}, {x:3,y:5}, {x:2,y:5}, {x:1,y:5}, {x:0,y:5}, 
+    {x:0,y:4}, {x:0,y:3}, {x:0,y:2}, {x:1,y:2}, {x:2,y:2}, {x:3,y:2}, {x:3,y:1}
+  ] }
 ];
+
+const encouragingPhrases = [
+  "真棒！", "好聪明！", "哇，太厉害了！", 
+  "做得好！", "完美的程序！", "你是天才！", 
+  "闪闪发光！", "继续加油！"
+];
+
+const tryAgainPhrases = [
+  "没关系，再试一次！", "哎呀，撞到了！", "加油，你可以的！", 
+  "稍微改一下就好啦！", "别灰心，再来！"
+];
+
+const getRandomPhrase = (list: string[]) => list[Math.floor(Math.random() * list.length)];
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>(Screen.HOME);
@@ -135,6 +171,7 @@ const App: React.FC = () => {
 
   const handleStartStory = async () => {
     unlockAudioContext(); // Important for iOS Safari
+    playClickSound();
     setCurrentScreen(Screen.STORY);
     // Ask for explanation of "computer program" in Chinese
     const text = await generateFriendlyExplanation("计算机程序");
@@ -143,6 +180,7 @@ const App: React.FC = () => {
   };
 
   const handleSpeak = () => {
+    playClickSound();
     if (explanation) speakText(explanation);
   };
 
@@ -150,18 +188,13 @@ const App: React.FC = () => {
 
   const addToProgram = (dir: Direction) => {
     if (isPlaying) return;
+    playClickSound();
     setProgram(prev => [...prev, dir]);
-    
-    // Chinese voice feedback for directions
-    const feedback = 
-      dir === Direction.UP ? "上" :
-      dir === Direction.DOWN ? "下" :
-      dir === Direction.LEFT ? "左" : "右";
-    speakText(feedback);
   };
 
   const clearProgram = () => {
     if (isPlaying) return;
+    playDeleteSound();
     setProgram([]);
     setGameState(prev => ({ ...prev, playerPos: LEVELS[levelIndex].playerPos }));
   };
@@ -172,12 +205,15 @@ const App: React.FC = () => {
       return;
     }
 
+    playClickSound(); // Sound for clicking run
     setIsPlaying(true);
     let currentPos = { ...gameState.playerPos };
     let failed = false;
 
     for (const step of program) {
-      await new Promise(resolve => setTimeout(resolve, 600)); // Step delay
+      // Step sound and delay
+      playStepSound();
+      await new Promise(resolve => setTimeout(resolve, 600)); 
 
       let nextPos = { ...currentPos };
       if (step === Direction.UP) nextPos.y = Math.max(0, currentPos.y - 1);
@@ -191,7 +227,8 @@ const App: React.FC = () => {
         currentPos = nextPos;
         setGameState(prev => ({ ...prev, playerPos: nextPos }));
       } else {
-         speakText("哎哟！撞墙了。");
+         playBonkSound();
+         speakText(getRandomPhrase(tryAgainPhrases));
          failed = true;
          break; // Stop execution on crash
       }
@@ -225,15 +262,20 @@ const App: React.FC = () => {
     }
 
     if (levelIndex < LEVELS.length - 1) {
-      speakText("太棒了！下一关！");
+      playWinSound();
+      const encouragement = getRandomPhrase(encouragingPhrases);
+      // Wait slightly for the win sound to sparkle before speaking
+      setTimeout(() => speakText(encouragement + " 下一关！"), 500);
+      
       setTimeout(() => {
         setLevelIndex(prev => prev + 1);
-      }, 1500);
+      }, 2500);
     } else {
-      speakText("耶！你通关了！你是小小程序员！");
+      playVictorySound();
+      speakText("哇！不可思议！你通关了所有30个关卡！你是超级程序员！");
       setCurrentScreen(Screen.REWARD);
       setLoadingReward(true);
-      const prompt = "A super happy chinese new year style dragon and a cute girl coding together, festive and magical";
+      const prompt = "A super happy chinese new year style dragon and a cute girl coding together, festive and magical, confetti";
       const img = await generateRewardSticker(prompt);
       setRewardImage(img);
       setLoadingReward(false);
@@ -243,7 +285,7 @@ const App: React.FC = () => {
   // --- Render Helpers ---
 
   const renderHome = () => (
-    <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 text-center space-y-8 bg-gradient-to-b from-pink-100 to-purple-200">
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 text-center space-y-8 bg-gradient-to-b from-pink-100 to-purple-200 relative">
       <div className="bg-white p-6 rounded-[2rem] shadow-xl">
         <BotIcon className="w-24 h-24 text-purple-500 mx-auto mb-4 animate-bounce-gentle" />
         <h1 className="text-4xl md:text-6xl font-black text-purple-600 mb-2">闪闪编程</h1>
@@ -260,6 +302,7 @@ const App: React.FC = () => {
 
           <button 
             onClick={() => {
+              playClickSound();
               unlockAudioContext(); // Important for iOS Safari
               setCurrentScreen(Screen.LEVEL_SELECT);
             }}
@@ -268,6 +311,18 @@ const App: React.FC = () => {
             <LayoutGrid size={24} /> 选择关卡
           </button>
       </div>
+
+      <div className="absolute bottom-4 opacity-40 hover:opacity-100 transition-opacity">
+        <a 
+          href="https://github.com/tlqtangok/littleChildGame" 
+          target="_blank" 
+          rel="noreferrer"
+          className="flex items-center gap-2 text-gray-600 text-xs font-medium"
+        >
+          <Github size={14} />
+          tlqtangok/littleChildGame
+        </a>
+      </div>
     </div>
   );
 
@@ -275,7 +330,10 @@ const App: React.FC = () => {
     <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 bg-yellow-50">
       <div className="max-w-2xl bg-white p-8 rounded-[3rem] shadow-2xl border-8 border-yellow-200 relative">
         <button 
-           onClick={() => setCurrentScreen(Screen.HOME)} 
+           onClick={() => {
+             playClickSound();
+             setCurrentScreen(Screen.HOME);
+           }} 
            className="absolute top-4 left-4 bg-gray-100 p-2 rounded-full text-gray-500 hover:bg-gray-200"
         >
           <Home size={24} />
@@ -298,6 +356,7 @@ const App: React.FC = () => {
         <div className="flex justify-center">
              <button 
               onClick={() => {
+                playClickSound();
                 setLevelIndex(0);
                 setCurrentScreen(Screen.GAME);
                 speakText("让我们写一个程序来拿到奖杯！");
@@ -312,10 +371,13 @@ const App: React.FC = () => {
   );
 
   const renderLevelSelect = () => (
-    <div className="min-h-[100dvh] bg-blue-50 flex flex-col items-center p-6">
+    <div className="min-h-[100dvh] bg-blue-50 flex flex-col items-center p-6 pb-20">
       <div className="w-full max-w-4xl flex justify-between items-center mb-8">
          <button 
-           onClick={() => setCurrentScreen(Screen.HOME)}
+           onClick={() => {
+             playClickSound();
+             setCurrentScreen(Screen.HOME);
+           }}
            className="bg-white p-3 rounded-xl shadow-md text-blue-500 font-bold hover:bg-blue-50 flex items-center gap-2"
          >
            <Home size={24} /> 主页
@@ -324,23 +386,22 @@ const App: React.FC = () => {
          <div className="w-24"></div> 
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-3xl">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full max-w-4xl">
          {LEVELS.map((_, index) => {
-           // Allow playing any level as requested by "freely choose", 
-           // but we can visualy highlight unlocked ones if we wanted.
-           // User asked to "freely choose", so all are enabled.
-           const isUnlocked = true; // index <= unlockedLevel; 
+           // Allow playing any level freely (requested by user previously), or use index <= unlockedLevel
+           const isUnlocked = true; 
            
            return (
              <button
                key={index}
                onClick={() => {
+                 playClickSound();
                  setLevelIndex(index);
                  setCurrentScreen(Screen.GAME);
                  setProgram([]);
                }}
                className={`
-                 aspect-square rounded-3xl flex flex-col items-center justify-center gap-2 text-2xl font-bold shadow-[0_6px_0_rgba(0,0,0,0.1)] transition-all active:translate-y-2 active:shadow-none
+                 aspect-square rounded-3xl flex flex-col items-center justify-center gap-2 text-xl font-bold shadow-[0_6px_0_rgba(0,0,0,0.1)] transition-all active:translate-y-2 active:shadow-none
                  ${index === levelIndex ? 'ring-4 ring-pink-400' : ''}
                  ${isUnlocked 
                     ? 'bg-white text-purple-600 hover:bg-purple-50' 
@@ -348,11 +409,11 @@ const App: React.FC = () => {
                `}
                disabled={!isUnlocked}
              >
-               <span className="text-4xl">{index + 1}</span>
+               <span className="text-3xl">{index + 1}</span>
                {isUnlocked ? (
                  <div className="flex gap-1">
-                   {[...Array(Math.min(3, Math.ceil((index + 1) / 3)))].map((_, i) => (
-                      <span key={i} className="text-yellow-400 text-sm">★</span>
+                   {[...Array(Math.min(3, Math.ceil(((index + 1) / 30) * 3)))].map((_, i) => (
+                      <span key={i} className="text-yellow-400 text-xs">★</span>
                    ))}
                  </div>
                ) : (
@@ -370,6 +431,7 @@ const App: React.FC = () => {
       {/* Header */}
       <div className="w-full max-w-4xl flex justify-between items-center mb-6 mt-4">
         <button onClick={() => {
+          playClickSound();
           setCurrentScreen(Screen.LEVEL_SELECT);
         }} className="text-blue-500 font-bold hover:text-blue-700 bg-white px-4 py-2 rounded-xl shadow-sm flex items-center gap-2">
            <LayoutGrid size={20} /> 关卡
@@ -378,6 +440,7 @@ const App: React.FC = () => {
           第 {levelIndex + 1} 关
         </h2>
         <button onClick={() => {
+           playClickSound();
            setCurrentScreen(Screen.HOME);
         }} className="text-blue-400 hover:text-blue-600">
            <Home size={24} />
@@ -402,7 +465,7 @@ const App: React.FC = () => {
              <div className="min-h-[80px] bg-gray-100 rounded-2xl p-4 flex flex-wrap gap-2 items-center">
                 {program.length === 0 && <span className="text-gray-400 italic">点击箭头添加步骤...</span>}
                 {program.map((step, idx) => (
-                  <div key={idx} className="bg-white p-2 rounded-lg shadow-sm border border-gray-200 text-purple-500">
+                  <div key={idx} className="bg-white p-2 rounded-lg shadow-sm border border-gray-200 text-purple-500 animate-bounce-gentle" style={{ animationDelay: `${idx * 0.1}s` }}>
                      {step === Direction.UP && <ArrowUp size={20} />}
                      {step === Direction.DOWN && <ArrowDown size={20} />}
                      {step === Direction.LEFT && <ArrowLeft size={20} />}
@@ -455,7 +518,7 @@ const App: React.FC = () => {
     <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 bg-gradient-to-tr from-purple-400 to-pink-500">
        <div className="bg-white p-8 rounded-[3rem] shadow-2xl text-center max-w-md w-full animate-bounce-gentle">
           <h2 className="text-4xl font-black text-pink-500 mb-2">太棒了！</h2>
-          <p className="text-gray-500 text-lg mb-6">你完成了所有关卡！</p>
+          <p className="text-gray-500 text-lg mb-6">你完成了所有30个关卡！</p>
           
           <div className="w-full aspect-square bg-gray-50 rounded-3xl mb-8 flex items-center justify-center overflow-hidden border-4 border-pink-100">
              {loadingReward ? (
@@ -472,6 +535,7 @@ const App: React.FC = () => {
 
           <button 
             onClick={() => {
+              playClickSound();
               setLevelIndex(0);
               setProgram([]);
               setRewardImage(null);
