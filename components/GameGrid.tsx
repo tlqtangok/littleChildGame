@@ -44,8 +44,11 @@ const GameGrid: React.FC<GameGridProps> = ({ gameState }) => {
 
   return (
     <div 
-      className="grid gap-3 p-4 bg-pink-200 rounded-3xl shadow-[0_8px_0_rgb(236,72,153)] border-4 border-pink-300 w-full max-w-md mx-auto"
-      style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))` }}
+      className="grid gap-3 p-4 bg-pink-200 rounded-3xl border-4 border-pink-300 w-full max-w-md mx-auto"
+      style={{ 
+        gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
+        boxShadow: '0 8px 0 rgb(236,72,153)' 
+      }}
     >
       {cells}
     </div>

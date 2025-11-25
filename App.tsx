@@ -213,7 +213,8 @@ const App: React.FC = () => {
     for (const step of program) {
       // Step sound and delay
       playStepSound();
-      await new Promise(resolve => setTimeout(resolve, 600)); 
+      // Ensure we pass a closure to setTimeout to be 100% CSP safe regarding execution
+      await new Promise(resolve => setTimeout(() => resolve(undefined), 600)); 
 
       let nextPos = { ...currentPos };
       if (step === Direction.UP) nextPos.y = Math.max(0, currentPos.y - 1);
@@ -285,8 +286,14 @@ const App: React.FC = () => {
   // --- Render Helpers ---
 
   const renderHome = () => (
-    <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 text-center space-y-8 bg-gradient-to-b from-pink-100 to-purple-200 relative">
-      <div className="bg-white p-6 rounded-[2rem] shadow-xl">
+    <div 
+      className="flex flex-col items-center justify-center p-6 text-center space-y-8 bg-gradient-to-b from-pink-100 to-purple-200 relative"
+      style={{ minHeight: '100dvh' }}
+    >
+      <div 
+        className="bg-white p-6 shadow-xl"
+        style={{ borderRadius: '2rem' }}
+      >
         <BotIcon className="w-24 h-24 text-purple-500 mx-auto mb-4 animate-bounce-gentle" />
         <h1 className="text-4xl md:text-6xl font-black text-purple-600 mb-2">闪闪编程</h1>
         <p className="text-xl text-gray-500">学习和电脑说话！</p>
@@ -295,7 +302,8 @@ const App: React.FC = () => {
       <div className="flex flex-col gap-4 w-full max-w-xs">
           <button 
             onClick={handleStartStory}
-            className="bg-pink-500 hover:bg-pink-400 text-white text-2xl font-bold py-6 px-12 rounded-full shadow-[0_8px_0_rgb(190,24,93)] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-3"
+            className="bg-pink-500 hover:bg-pink-400 text-white text-2xl font-bold py-6 px-12 rounded-full transition-all flex items-center justify-center gap-3"
+            style={{ boxShadow: '0 8px 0 rgb(190,24,93)' }}
           >
             <Play fill="currentColor" /> 开始故事
           </button>
@@ -306,7 +314,8 @@ const App: React.FC = () => {
               unlockAudioContext(); // Important for iOS Safari
               setCurrentScreen(Screen.LEVEL_SELECT);
             }}
-            className="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 text-xl font-bold py-4 px-12 rounded-full shadow-[0_6px_0_rgb(202,138,4)] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-3"
+            className="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 text-xl font-bold py-4 px-12 rounded-full transition-all flex items-center justify-center gap-3"
+            style={{ boxShadow: '0 6px 0 rgb(202,138,4)' }}
           >
             <LayoutGrid size={24} /> 选择关卡
           </button>
@@ -327,8 +336,14 @@ const App: React.FC = () => {
   );
 
   const renderStory = () => (
-    <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 bg-yellow-50">
-      <div className="max-w-2xl bg-white p-8 rounded-[3rem] shadow-2xl border-8 border-yellow-200 relative">
+    <div 
+      className="flex flex-col items-center justify-center p-6 bg-yellow-50"
+      style={{ minHeight: '100dvh' }}
+    >
+      <div 
+        className="max-w-2xl bg-white p-8 border-8 border-yellow-200 relative"
+        style={{ borderRadius: '3rem' }}
+      >
         <button 
            onClick={() => {
              playClickSound();
@@ -345,7 +360,10 @@ const App: React.FC = () => {
           <Volume2 size={32} />
         </button>
         <h2 className="text-3xl font-bold text-purple-600 mb-6 text-center mt-8 md:mt-0">什么是程序？</h2>
-        <div className="text-xl md:text-2xl text-gray-600 leading-relaxed text-center mb-8 min-h-[120px] flex items-center justify-center">
+        <div 
+          className="text-xl md:text-2xl text-gray-600 leading-relaxed text-center mb-8 flex items-center justify-center"
+          style={{ minHeight: '120px' }}
+        >
           {explanation ? explanation : (
             <div className="animate-pulse flex flex-col items-center">
                 <Sparkles className="animate-spin mb-2 text-yellow-400" />
@@ -361,7 +379,8 @@ const App: React.FC = () => {
                 setCurrentScreen(Screen.GAME);
                 speakText("让我们写一个程序来拿到奖杯！");
               }}
-              className="bg-purple-500 hover:bg-purple-400 text-white text-xl font-bold py-4 px-10 rounded-full shadow-[0_6px_0_rgb(107,33,168)] active:translate-y-2 active:shadow-none transition-all flex items-center gap-2"
+              className="bg-purple-500 hover:bg-purple-400 text-white text-xl font-bold py-4 px-10 rounded-full transition-all flex items-center gap-2"
+              style={{ boxShadow: '0 6px 0 rgb(107,33,168)' }}
             >
               <Play size={24} fill="currentColor" /> 试一试！
             </button>
@@ -371,7 +390,10 @@ const App: React.FC = () => {
   );
 
   const renderLevelSelect = () => (
-    <div className="min-h-[100dvh] bg-blue-50 flex flex-col items-center p-6 pb-20">
+    <div 
+      className="bg-blue-50 flex flex-col items-center p-6 pb-20"
+      style={{ minHeight: '100dvh' }}
+    >
       <div className="w-full max-w-4xl flex justify-between items-center mb-8">
          <button 
            onClick={() => {
@@ -401,12 +423,13 @@ const App: React.FC = () => {
                  setProgram([]);
                }}
                className={`
-                 aspect-square rounded-3xl flex flex-col items-center justify-center gap-2 text-xl font-bold shadow-[0_6px_0_rgba(0,0,0,0.1)] transition-all active:translate-y-2 active:shadow-none
+                 aspect-square rounded-3xl flex flex-col items-center justify-center gap-2 text-xl font-bold transition-all active:translate-y-2 active:shadow-none
                  ${index === levelIndex ? 'ring-4 ring-pink-400' : ''}
                  ${isUnlocked 
                     ? 'bg-white text-purple-600 hover:bg-purple-50' 
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
                `}
+               style={{ boxShadow: '0 6px 0 rgba(0,0,0,0.1)' }}
                disabled={!isUnlocked}
              >
                <span className="text-3xl">{index + 1}</span>
@@ -427,7 +450,10 @@ const App: React.FC = () => {
   );
 
   const renderGame = () => (
-    <div className="min-h-[100dvh] bg-blue-50 flex flex-col items-center p-4">
+    <div 
+      className="bg-blue-50 flex flex-col items-center p-4"
+      style={{ minHeight: '100dvh' }}
+    >
       {/* Header */}
       <div className="w-full max-w-4xl flex justify-between items-center mb-6 mt-4">
         <button onClick={() => {
@@ -455,14 +481,20 @@ const App: React.FC = () => {
         </div>
 
         {/* Controls */}
-        <div className="flex-1 w-full bg-white p-6 rounded-[2rem] shadow-xl border-4 border-blue-100">
+        <div 
+          className="flex-1 w-full bg-white p-6 shadow-xl border-4 border-blue-100"
+          style={{ borderRadius: '2rem' }}
+        >
           <div className="mb-6">
              <div className="flex justify-between items-end mb-2">
                 <h3 className="text-xl font-bold text-gray-500">我的程序：</h3>
                 <span className="text-sm text-gray-400">{program.length} 步</span>
              </div>
              
-             <div className="min-h-[80px] bg-gray-100 rounded-2xl p-4 flex flex-wrap gap-2 items-center">
+             <div 
+               className="bg-gray-100 rounded-2xl p-4 flex flex-wrap gap-2 items-center"
+               style={{ minHeight: '80px' }}
+             >
                 {program.length === 0 && <span className="text-gray-400 italic">点击箭头添加步骤...</span>}
                 {program.map((step, idx) => (
                   <div key={idx} className="bg-white p-2 rounded-lg shadow-sm border border-gray-200 text-purple-500 animate-bounce-gentle" style={{ animationDelay: `${idx * 0.1}s` }}>
@@ -475,7 +507,10 @@ const App: React.FC = () => {
              </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-8 max-w-[300px] mx-auto">
+          <div 
+            className="grid grid-cols-3 gap-4 mb-8 mx-auto"
+            style={{ maxWidth: '300px' }}
+          >
              <div />
              <GameButton onClick={() => addToProgram(Direction.UP)} icon={<ArrowUp size={32} />} color="bg-orange-400" />
              <div />
@@ -501,10 +536,11 @@ const App: React.FC = () => {
               disabled={isPlaying}
               className={`
                 flex-1 bg-green-500 hover:bg-green-400 text-white text-xl font-bold py-4 px-8 rounded-2xl 
-                shadow-[0_6px_0_rgb(21,128,61)] active:translate-y-2 active:shadow-none transition-all
+                active:translate-y-2 active:shadow-none transition-all
                 flex items-center justify-center gap-2
                 ${isPlaying ? 'opacity-50 cursor-not-allowed shadow-none translate-y-2' : ''}
               `}
+              style={!isPlaying ? { boxShadow: '0 6px 0 rgb(21,128,61)' } : {}}
             >
               <Play fill="currentColor" /> 运行程序！
             </button>
@@ -515,8 +551,14 @@ const App: React.FC = () => {
   );
 
   const renderReward = () => (
-    <div className="flex flex-col items-center justify-center min-h-[100dvh] p-6 bg-gradient-to-tr from-purple-400 to-pink-500">
-       <div className="bg-white p-8 rounded-[3rem] shadow-2xl text-center max-w-md w-full animate-bounce-gentle">
+    <div 
+      className="flex flex-col items-center justify-center p-6 bg-gradient-to-tr from-purple-400 to-pink-500"
+      style={{ minHeight: '100dvh' }}
+    >
+       <div 
+         className="bg-white p-8 shadow-2xl text-center max-w-md w-full animate-bounce-gentle"
+         style={{ borderRadius: '3rem' }}
+       >
           <h2 className="text-4xl font-black text-pink-500 mb-2">太棒了！</h2>
           <p className="text-gray-500 text-lg mb-6">你完成了所有30个关卡！</p>
           
@@ -541,7 +583,8 @@ const App: React.FC = () => {
               setRewardImage(null);
               setCurrentScreen(Screen.HOME);
             }}
-            className="w-full bg-purple-500 hover:bg-purple-400 text-white text-xl font-bold py-4 rounded-2xl shadow-[0_6px_0_rgb(126,34,206)] active:translate-y-2 active:shadow-none transition-all"
+            className="w-full bg-purple-500 hover:bg-purple-400 text-white text-xl font-bold py-4 rounded-2xl active:translate-y-2 active:shadow-none transition-all"
+            style={{ boxShadow: '0 6px 0 rgb(126,34,206)' }}
           >
             再玩一次
           </button>
@@ -564,7 +607,8 @@ const App: React.FC = () => {
 const GameButton = ({ onClick, icon, color }: { onClick: () => void; icon: React.ReactNode; color: string }) => (
   <button 
     onClick={onClick}
-    className={`${color} text-white p-4 rounded-2xl shadow-[0_6px_0_rgba(0,0,0,0.2)] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center`}
+    className={`${color} text-white p-4 rounded-2xl active:translate-y-2 active:shadow-none transition-all flex items-center justify-center`}
+    style={{ boxShadow: '0 6px 0 rgba(0,0,0,0.2)' }}
   >
     {icon}
   </button>
