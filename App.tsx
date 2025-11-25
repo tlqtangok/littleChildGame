@@ -117,8 +117,8 @@ const LEVELS: GameState[] = [
   // Level 26: Stripes
   { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 5, y: 5 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:1,y:3}, {x:1,y:4}, {x:3,y:5}, {x:3,y:4}, {x:3,y:3}, {x:3,y:2}, {x:3,y:1}] },
   
-  // Level 27: The Hurdles
-  { gridSize: 6, playerPos: { x: 0, y: 5 }, goalPos: { x: 5, y: 5 }, obstacles: [{x:1,y:5}, {x:2,y:4}, {x:3,y:5}, {x:4,y:4}, {x:5,y:3}, {x:5,y:4}] },
+  // Level 27: The Hurdles (Fixed: Removed impossible barrier at 4,4)
+  { gridSize: 6, playerPos: { x: 0, y: 5 }, goalPos: { x: 5, y: 5 }, obstacles: [{x:1,y:5}, {x:2,y:4}, {x:3,y:5}, {x:5,y:3}, {x:5,y:4}] },
   
   // Level 28: Around the World
   { gridSize: 6, playerPos: { x: 2, y: 2 }, goalPos: { x: 3, y: 3 }, obstacles: [{x:2,y:3}, {x:3,y:2}, {x:1,y:1}, {x:4,y:4}, {x:1,y:4}, {x:4,y:1}] },
@@ -126,13 +126,22 @@ const LEVELS: GameState[] = [
   // Level 29: Final Test A
   { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 5, y: 0 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:3,y:5}, {x:3,y:4}, {x:3,y:3}, {x:5,y:2}, {x:5,y:1}] },
 
-  // Level 30: The Grand Spiral (Challenge)
-  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 3, y: 3 }, obstacles: [
-    {x:1,y:0}, {x:2,y:0}, {x:3,y:0}, {x:4,y:0}, {x:5,y:0}, 
-    {x:5,y:1}, {x:5,y:2}, {x:5,y:3}, {x:5,y:4}, {x:5,y:5}, 
-    {x:4,y:5}, {x:3,y:5}, {x:2,y:5}, {x:1,y:5}, {x:0,y:5}, 
-    {x:0,y:4}, {x:0,y:3}, {x:0,y:2}, {x:1,y:2}, {x:2,y:2}, {x:3,y:2}, {x:3,y:1}
-  ] }
+  // Level 30: The Grand Spiral (Redesigned & Verified)
+  { 
+    gridSize: 6, 
+    playerPos: { x: 0, y: 0 }, 
+    goalPos: { x: 3, y: 3 }, 
+    obstacles: [
+      // Force Top Row (0,0 -> 5,0)
+      {x:0,y:1}, {x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:4,y:1},
+      // Force Right Col (5,0 -> 5,5)
+      {x:4,y:2}, {x:4,y:3}, {x:4,y:4},
+      // Force Bottom Row (5,5 -> 0,5)
+      {x:1,y:4}, {x:2,y:4}, {x:3,y:4},
+      // Force Left Up (0,5 -> 0,2) then In
+      {x:1,y:3}, {x:2,y:3}
+    ] 
+  }
 ];
 
 const encouragingPhrases = [
