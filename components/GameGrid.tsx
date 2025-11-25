@@ -1,5 +1,5 @@
 import React from 'react';
-import { GameState, Position } from '../types';
+import { GameState } from '../types';
 import { Bot, Trophy, Hexagon } from 'lucide-react';
 
 interface GameGridProps {
@@ -19,21 +19,23 @@ const GameGrid: React.FC<GameGridProps> = ({ gameState }) => {
 
       let content = null;
       if (isPlayer) {
-        content = <Bot className="w-8 h-8 md:w-12 md:h-12 text-white animate-bounce" />;
+        // Use percentage sizing for icons so they scale perfectly with the cell
+        content = <Bot className="w-[60%] h-[60%] text-white animate-bounce" />;
       } else if (isGoal) {
-        content = <Trophy className="w-8 h-8 md:w-12 md:h-12 text-yellow-500 animate-pulse" />;
+        content = <Trophy className="w-[60%] h-[60%] text-yellow-500 animate-pulse" />;
       } else if (isObstacle) {
-        content = <Hexagon className="w-8 h-8 md:w-12 md:h-12 text-gray-400 fill-gray-400" />;
+        content = <Hexagon className="w-[60%] h-[60%] text-gray-400 fill-gray-400" />;
       }
 
       cells.push(
         <div
           key={`${x}-${y}`}
+          // Enforce aspect-square on every cell
           className={`
-            relative w-full aspect-square rounded-2xl flex items-center justify-center shadow-sm
-            ${isPlayer ? 'bg-purple-400' : 'bg-white'}
-            ${isGoal ? 'bg-pink-100 ring-4 ring-pink-300' : ''}
-            ${!isPlayer && !isGoal ? 'bg-white/80' : ''}
+            relative w-full aspect-square rounded-md md:rounded-xl lg:rounded-2xl flex items-center justify-center shadow-sm border border-pink-100
+            ${isPlayer ? 'bg-purple-400 border-purple-400' : 'bg-white'}
+            ${isGoal ? 'bg-pink-100 ring-2 md:ring-4 ring-pink-300 border-pink-200' : ''}
+            ${!isPlayer && !isGoal ? 'bg-white/90' : ''}
           `}
         >
           {content}
@@ -44,10 +46,12 @@ const GameGrid: React.FC<GameGridProps> = ({ gameState }) => {
 
   return (
     <div 
-      className="grid gap-3 p-4 bg-pink-200 rounded-3xl border-4 border-pink-300 w-full max-w-md mx-auto"
+      // Optimized padding and gaps for 5x5 grid
+      className="grid gap-1 md:gap-3 p-1 md:p-4 bg-pink-200 rounded-2xl md:rounded-3xl border-4 border-pink-300 w-full mx-auto"
       style={{ 
         gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
-        boxShadow: '0 8px 0 rgb(236,72,153)' 
+        boxShadow: '0 6px 0 rgb(236,72,153)',
+        aspectRatio: '1 / 1'
       }}
     >
       {cells}

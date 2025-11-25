@@ -23,124 +23,349 @@ import {
   Trophy,
   LayoutGrid,
   Home,
-  Github
+  Github,
+  Star,
+  Check
 } from 'lucide-react';
 
-// --- Level Definitions (30 Levels Sorted by Difficulty) ---
+// --- Level Definitions (Sorted Easy to Hard) ---
+// ALL LEVELS ARE 5x5 (x: 0-4, y: 0-4)
 
 const LEVELS: GameState[] = [
-  // --- STAGE 1: VERY EASY (4x4 Grid, Short Paths) ---
+  // --- STAGE 1: BABY STEPS (Tutorials) ---
   
-  // Level 1: Just go right (Introduction)
-  { gridSize: 4, playerPos: { x: 0, y: 1 }, goalPos: { x: 3, y: 1 }, obstacles: [] },
-  
-  // Level 2: Just go down
-  { gridSize: 4, playerPos: { x: 1, y: 0 }, goalPos: { x: 1, y: 3 }, obstacles: [{ x: 0, y: 1 }, { x: 2, y: 2 }] },
-  
-  // Level 3: One simple turn (L-shape)
-  { gridSize: 4, playerPos: { x: 0, y: 0 }, goalPos: { x: 2, y: 2 }, obstacles: [{ x: 1, y: 0 }, { x: 2, y: 0 }] },
-  
-  // Level 4: Simple Dodge (Up and Over)
-  { gridSize: 4, playerPos: { x: 0, y: 2 }, goalPos: { x: 3, y: 2 }, obstacles: [{ x: 1, y: 2 }, { x: 1, y: 3 }] },
-  
-  // Level 5: The "Stairs" (Right, Down, Right, Down)
-  { gridSize: 4, playerPos: { x: 0, y: 0 }, goalPos: { x: 2, y: 2 }, obstacles: [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: 2, y: 1 }] },
-
-  // --- STAGE 2: EASY (5x5 Grid, More Space) ---
-
-  // Level 6: Long Straight Walk (Introduction to 5x5)
-  { gridSize: 5, playerPos: { x: 0, y: 2 }, goalPos: { x: 4, y: 2 }, obstacles: [{ x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }] },
-  
-  // Level 7: Go Around the Block
-  { gridSize: 5, playerPos: { x: 2, y: 0 }, goalPos: { x: 2, y: 4 }, obstacles: [{ x: 2, y: 2 }, { x: 1, y: 2 }, { x: 3, y: 2 }] },
-  
-  // Level 8: The Tunnel (Straight but constrained)
-  { gridSize: 5, playerPos: { x: 0, y: 2 }, goalPos: { x: 4, y: 2 }, obstacles: [{x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:1,y:3}, {x:2,y:3}, {x:3,y:3}] },
-  
-  // Level 9: Big U-Turn (Down, Right, Up)
-  { gridSize: 5, playerPos: { x: 0, y: 0 }, goalPos: { x: 4, y: 0 }, obstacles: [{x:1,y:0}, {x:2,y:0}, {x:3,y:0}, {x:1,y:2}, {x:2,y:2}, {x:3,y:2}] },
-  
-  // Level 10: Simple Zig Zag
-  { gridSize: 5, playerPos: { x: 1, y: 0 }, goalPos: { x: 3, y: 4 }, obstacles: [{x:2,y:0}, {x:2,y:1}, {x:2,y:3}, {x:2,y:4}] },
-
-  // --- STAGE 3: MEDIUM (Complex Turns) ---
-
-  // Level 11: Pillars (Weave through)
-  { gridSize: 5, playerPos: { x: 0, y: 2 }, goalPos: { x: 4, y: 2 }, obstacles: [{x:1,y:1}, {x:1,y:3}, {x:3,y:1}, {x:3,y:3}] },
-  
-  // Level 12: The Snake (Winding Path)
-  { gridSize: 5, playerPos: { x: 0, y: 0 }, goalPos: { x: 4, y: 0 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:3,y:0}] },
-  
-  // Level 13: Two Walls (Go Up and Down)
-  { gridSize: 5, playerPos: { x: 0, y: 0 }, goalPos: { x: 4, y: 0 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:3,y:4}, {x:3,y:3}, {x:3,y:2}] },
-  
-  // Level 14: Zig Zag Up
-  { gridSize: 5, playerPos: { x: 2, y: 4 }, goalPos: { x: 2, y: 0 }, obstacles: [{x:2,y:3}, {x:1,y:3}, {x:1,y:2}, {x:3,y:2}, {x:3,y:1}, {x:2,y:1}] },
-  
-  // Level 15: Corner to Corner
-  { gridSize: 5, playerPos: { x: 0, y: 4 }, goalPos: { x: 4, y: 0 }, obstacles: [{x:0,y:3}, {x:1,y:3}, {x:2,y:3}, {x:2,y:2}, {x:2,y:1}, {x:3,y:1}] },
-
-  // --- STAGE 4: HARD (Longer Paths) ---
-
-  // Level 16: The Maze Begins
-  { gridSize: 5, playerPos: { x: 2, y: 2 }, goalPos: { x: 4, y: 4 }, obstacles: [{x:3,y:3}, {x:3,y:2}, {x:2,y:3}, {x:1,y:2}, {x:2,y:1}] },
-  
-  // Level 17: Escape the Box
-  { gridSize: 5, playerPos: { x: 2, y: 2 }, goalPos: { x: 0, y: 0 }, obstacles: [{x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:3,y:2}, {x:3,y:3}, {x:2,y:3}, {x:1,y:3}] }, 
-  
-  // Level 18: Wide 6x6 Diagonal
-  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 5, y: 5 }, obstacles: [{x:1,y:0}, {x:2,y:1}, {x:3,y:2}, {x:4,y:3}, {x:5,y:4}] },
-  
-  // Level 19: Long Way Around (6x6)
-  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 0, y: 1 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:1,y:3}, {x:1,y:4}, {x:1,y:5}, {x:3,y:0}, {x:3,y:1}, {x:3,y:2}, {x:3,y:3}, {x:3,y:4}, {x:3,y:5}, {x:5,y:0}, {x:5,y:1}] },
-  
-  // Level 20: Divide (Choose your path)
-  { gridSize: 6, playerPos: { x: 2, y: 5 }, goalPos: { x: 3, y: 0 }, obstacles: [{x:2,y:4}, {x:3,y:4}, {x:2,y:3}, {x:3,y:3}, {x:2,y:2}, {x:3,y:2}] },
-
-  // --- STAGE 5: EXPERT (6x6 Complex) ---
-
-  // Level 21: Scatter
-  { gridSize: 6, playerPos: { x: 0, y: 2 }, goalPos: { x: 5, y: 3 }, obstacles: [{x:2,y:2}, {x:3,y:3}, {x:2,y:3}, {x:3,y:2}] },
-  
-  // Level 22: Tight Spin (6x6)
-  { gridSize: 6, playerPos: { x: 2, y: 3 }, goalPos: { x: 3, y: 2 }, obstacles: [{x:2,y:2}, {x:3,y:3}, {x:1,y:3}, {x:4,y:2}, {x:2,y:4}, {x:3,y:1}] },
-  
-  // Level 23: The Big Snake
-  { gridSize: 6, playerPos: { x: 0, y: 5 }, goalPos: { x: 5, y: 0 }, obstacles: [{x:1,y:5}, {x:1,y:4}, {x:1,y:3}, {x:3,y:3}, {x:3,y:2}, {x:3,y:1}, {x:5,y:1}] },
-  
-  // Level 24: Spiral In
-  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 3, y: 3 }, obstacles: [{x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:4,y:1}, {x:4,y:2}, {x:4,y:3}, {x:4,y:4}, {x:2,y:3}] },
-  
-  // Level 25: Corner Maze
-  { gridSize: 6, playerPos: { x: 5, y: 5 }, goalPos: { x: 0, y: 0 }, obstacles: [{x:4,y:4}, {x:5,y:4}, {x:2,y:2}, {x:3,y:2}, {x:2,y:3}, {x:3,y:3}, {x:0,y:1}, {x:1,y:1}, {x:1,y:0}] },
-  
-  // Level 26: Stripes
-  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 5, y: 5 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:1,y:3}, {x:1,y:4}, {x:3,y:5}, {x:3,y:4}, {x:3,y:3}, {x:3,y:2}, {x:3,y:1}] },
-  
-  // Level 27: The Hurdles (Fixed: Removed impossible barrier at 4,4)
-  { gridSize: 6, playerPos: { x: 0, y: 5 }, goalPos: { x: 5, y: 5 }, obstacles: [{x:1,y:5}, {x:2,y:4}, {x:3,y:5}, {x:5,y:3}, {x:5,y:4}] },
-  
-  // Level 28: Around the World
-  { gridSize: 6, playerPos: { x: 2, y: 2 }, goalPos: { x: 3, y: 3 }, obstacles: [{x:2,y:3}, {x:3,y:2}, {x:1,y:1}, {x:4,y:4}, {x:1,y:4}, {x:4,y:1}] },
-
-  // Level 29: Final Test A
-  { gridSize: 6, playerPos: { x: 0, y: 0 }, goalPos: { x: 5, y: 0 }, obstacles: [{x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:3,y:5}, {x:3,y:4}, {x:3,y:3}, {x:5,y:2}, {x:5,y:1}] },
-
-  // Level 30: The Grand Spiral (Redesigned & Verified)
+  // Level 1: One step Right
   { 
-    gridSize: 6, 
-    playerPos: { x: 0, y: 0 }, 
+    gridSize: 5, 
+    playerPos: { x: 1, y: 2 }, 
+    goalPos: { x: 2, y: 2 }, 
+    obstacles: [] 
+  },
+  
+  // Level 2: Two steps Right
+  { 
+    gridSize: 5, 
+    playerPos: { x: 1, y: 2 }, 
+    goalPos: { x: 3, y: 2 }, 
+    obstacles: [] 
+  },
+  
+  // Level 3: Go Down (1 Step)
+  { 
+    gridSize: 5, 
+    playerPos: { x: 2, y: 1 }, 
+    goalPos: { x: 2, y: 2 }, 
+    obstacles: [] 
+  },
+  
+  // Level 4: Simple Turn (Down then Right)
+  { 
+    gridSize: 5, 
+    playerPos: { x: 1, y: 1 }, 
+    goalPos: { x: 2, y: 2 }, 
+    obstacles: [{x:2,y:1}] // Blocks direct right path
+  },
+  
+  // Level 5: Hop Over (Up, Right, Right, Down)
+  { 
+    gridSize: 5, 
+    playerPos: { x: 1, y: 2 }, 
+    goalPos: { x: 3, y: 2 }, 
+    obstacles: [{ x: 2, y: 2 }] 
+  },
+
+  // --- STAGE 2: SIMPLE SHAPES ---
+
+  // Level 6: The Corner (L shape)
+  { 
+    gridSize: 5, 
+    playerPos: { x: 1, y: 1 }, 
     goalPos: { x: 3, y: 3 }, 
+    obstacles: [{x:2,y:2}, {x:3,y:1}, {x:1,y:3}, {x:2,y:1}] 
+  },
+  
+  // Level 7: The Tunnel (Straight line with walls)
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 2 }, 
+    goalPos: { x: 4, y: 2 }, 
     obstacles: [
-      // Force Top Row (0,0 -> 5,0)
-      {x:0,y:1}, {x:1,y:1}, {x:2,y:1}, {x:3,y:1}, {x:4,y:1},
-      // Force Right Col (5,0 -> 5,5)
-      {x:4,y:2}, {x:4,y:3}, {x:4,y:4},
-      // Force Bottom Row (5,5 -> 0,5)
-      {x:1,y:4}, {x:2,y:4}, {x:3,y:4},
-      // Force Left Up (0,5 -> 0,2) then In
-      {x:1,y:3}, {x:2,y:3}
+      {x:1,y:1}, {x:2,y:1}, {x:3,y:1},
+      {x:1,y:3}, {x:2,y:3}, {x:3,y:3}
     ] 
+  },
+  
+  // Level 8: U-Turn (Down, Right, Right, Up)
+  { 
+    gridSize: 5, 
+    playerPos: { x: 1, y: 2 }, 
+    goalPos: { x: 3, y: 2 }, 
+    obstacles: [{x:2,y:2}, {x:2,y:1}] 
+  }, 
+  
+  // Level 9: Dodge (Up, Right, Right, Down)
+  { 
+    gridSize: 5, 
+    playerPos: { x: 1, y: 2 }, 
+    goalPos: { x: 3, y: 2 }, 
+    obstacles: [{x:2,y:2}, {x:2,y:3}] // Block bottom path, force top
+  },
+  
+  // Level 10: Staircase
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 4 }, 
+    goalPos: { x: 3, y: 1 }, 
+    obstacles: [
+        {x:1,y:4}, {x:2,y:4}, {x:3,y:4},
+        {x:2,y:3}, {x:3,y:3},
+        {x:3,y:2}
+    ] 
+  }, 
+
+  // --- STAGE 3: INTERMEDIATE ---
+
+  // Level 11: The Snake
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 1 }, 
+    goalPos: { x: 4, y: 1 }, 
+    obstacles: [
+      {x:1,y:1}, {x:1,y:0}, 
+      {x:3,y:1}, {x:3,y:2}, {x:3,y:3}
+    ] 
+  },
+  
+  // Level 12: Around the Lake
+  { 
+    gridSize: 5, 
+    playerPos: { x: 2, y: 4 }, 
+    goalPos: { x: 2, y: 0 }, 
+    obstacles: [{x:2,y:2}, {x:2,y:3}, {x:1,y:2}, {x:3,y:2}] 
+  },
+
+  // Level 13: Spiral In
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 1 }, 
+    goalPos: { x: 2, y: 2 }, 
+    obstacles: [
+        {x:1,y:1}, {x:2,y:1}, {x:3,y:1},
+        {x:3,y:2}, {x:3,y:3},
+        {x:2,y:3}
+    ]
+  }, 
+
+  // Level 14: Zig Zag Up
+  { 
+    gridSize: 5, 
+    playerPos: { x: 1, y: 4 }, 
+    goalPos: { x: 3, y: 0 }, 
+    obstacles: [
+      {x:2,y:4}, {x:2,y:3}, 
+      {x:1,y:2}, {x:0,y:2},
+      {x:3,y:2}, {x:4,y:2}
+    ] 
+  },
+  
+  // Level 15: Two Rooms
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 2 }, 
+    goalPos: { x: 4, y: 2 }, 
+    obstacles: [
+      {x:2,y:0}, {x:2,y:1}, {x:2,y:3}, {x:2,y:4}, // Wall with gap at y=2
+      {x:3,y:1}, {x:3,y:3} // Little buffers
+    ] 
+  },
+
+  // --- STAGE 4: ADVANCED ---
+
+  // Level 16: Scatter
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 0 }, 
+    goalPos: { x: 4, y: 4 }, 
+    obstacles: [{x:1,y:1}, {x:2,y:2}, {x:3,y:3}, {x:4,y:3}, {x:3,y:4}] 
+  },
+  
+  // Level 17: Long Walk
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 4 }, 
+    goalPos: { x: 0, y: 3 }, 
+    obstacles: [
+      {x:1,y:4}, {x:1,y:3}, {x:1,y:2}, 
+      {x:2,y:1}, {x:3,y:1}, {x:4,y:1}, // Top bar
+      {x:3,y:3}, {x:2,y:3} 
+    ] 
+  },
+
+  // Level 18: The Fortress
+  {
+    gridSize: 5,
+    playerPos: { x: 0, y: 4 },
+    goalPos: { x: 3, y: 2 }, // Goal inside
+    obstacles: [
+       {x:2,y:1}, {x:3,y:1}, {x:4,y:1},
+       {x:2,y:2},            {x:4,y:2},
+       {x:2,y:3},            {x:4,y:3} 
+       // Gap at (3,3)
+    ]
+  },
+
+  // Level 19: Maze Runner
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 0 }, 
+    goalPos: { x: 4, y: 4 }, 
+    obstacles: [
+      {x:1,y:0}, {x:1,y:2}, 
+      {x:3,y:1}, {x:3,y:3}, 
+      {x:2,y:2}, {x:0,y:2}
+    ] 
+  },
+
+  // Level 20: The Bridge
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 2 }, 
+    goalPos: { x: 4, y: 2 }, 
+    obstacles: [
+      {x:1,y:1}, {x:2,y:1}, {x:3,y:1}, 
+      {x:1,y:3}, {x:2,y:3}, {x:3,y:3},
+      {x:2,y:0}, {x:2,y:4} // Distractions
+    ] 
+  }, 
+
+  // --- STAGE 5: EXPERT ---
+
+  // Level 21: Vertical Stripes
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 2 }, 
+    goalPos: { x: 4, y: 2 }, 
+    obstacles: [
+      {x:1,y:0}, {x:1,y:1}, {x:1,y:2}, {x:1,y:4}, // Gap at y=3
+      {x:3,y:0}, {x:3,y:2}, {x:3,y:3}, {x:3,y:4}, // Gap at y=1
+    ] 
+  },
+
+  // Level 22: Winding Road
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 0 }, 
+    goalPos: { x: 4, y: 4 }, 
+    obstacles: [
+      {x:1,y:0}, {x:1,y:1}, {x:1,y:2}, 
+      {x:3,y:4}, {x:3,y:3}, {x:3,y:2},
+    ] 
+  },
+
+  // Level 23: Center Guard
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 0 }, 
+    goalPos: { x: 2, y: 2 }, 
+    obstacles: [
+      {x:1,y:1}, {x:3,y:1},
+      {x:1,y:2}, {x:3,y:2}, 
+      {x:1,y:3}, {x:2,y:3}, {x:3,y:3}
+    ]
+  },
+
+  // Level 24: Hooks
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 2 }, 
+    goalPos: { x: 4, y: 2 }, 
+    obstacles: [
+      {x:1,y:1}, {x:1,y:2}, {x:1,y:3}, // C
+      {x:3,y:0}, {x:3,y:1}, {x:3,y:2}, // Hook down
+    ] 
+  },
+
+  // Level 25: Checkers
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 0 }, 
+    goalPos: { x: 4, y: 4 }, 
+    obstacles: [
+      {x:1,y:0}, {x:3,y:0},
+      {x:0,y:2}, {x:2,y:2}, {x:4,y:2},
+      {x:1,y:4}, {x:3,y:4}
+    ] 
+  },
+  
+  // Level 26: The Hurdles
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 4 }, 
+    goalPos: { x: 4, y: 4 }, 
+    obstacles: [
+      {x:1,y:4}, 
+      {x:1,y:3}, 
+      {x:2,y:4}, 
+      {x:3,y:3}, 
+      {x:3,y:4} 
+    ] 
+  },
+
+  // Level 27: Around the Edge
+  { 
+    gridSize: 5, 
+    playerPos: { x: 2, y: 2 }, 
+    goalPos: { x: 2, y: 1 }, 
+    obstacles: [
+      {x:2,y:3}, // Block down
+      {x:1,y:2}, {x:3,y:2}, // Block sides
+      // Force Up -> Left -> Down -> Right -> Up
+      // Or Up -> Right -> Down -> Left -> Up
+      // Actually goal is (2,1). Start (2,2). 
+      // If (2,1) is open, it's 1 step up. Too easy.
+      // Let's put obstacle at (2,1).
+      {x:2,y:1}, 
+      // Now path must go around.
+      {x:1,y:1}, {x:3,y:1} // Block diagonals
+    ] 
+  },
+
+  // Level 28: Final Maze 1
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 0 }, 
+    goalPos: { x: 4, y: 4 }, 
+    obstacles: [
+      {x:0,y:1}, {x:1,y:1}, {x:2,y:1}, {x:3,y:1},
+      {x:3,y:3}, {x:2,y:3}, {x:1,y:3}, {x:0,y:3},
+      {x:4,y:2} // Block simple drop
+    ] 
+  },
+
+  // Level 29: Final Maze 2
+  { 
+    gridSize: 5, 
+    playerPos: { x: 4, y: 0 }, 
+    goalPos: { x: 0, y: 4 }, 
+    obstacles: [
+      {x:3,y:0}, {x:3,y:1}, {x:3,y:2}, 
+      {x:1,y:4}, {x:1,y:3}, {x:1,y:2}, 
+      {x:0,y:2}, {x:4,y:2}
+    ] 
+  },
+
+  // Level 30: Graduation (Grand Spiral 5x5)
+  { 
+    gridSize: 5, 
+    playerPos: { x: 0, y: 0 }, 
+    goalPos: { x: 2, y: 2 }, 
+    obstacles: [
+       {x:0,y:1}, // Block down
+       {x:1,y:1}, {x:2,y:1}, {x:3,y:1}, // Force top row
+       {x:3,y:2}, {x:3,y:3}, // Force right side down
+       {x:2,y:3}, {x:1,y:3}, // Force bottom
+       // Now at (0,3) -> (0,2) -> (1,2) -> (2,2)
+    ]
   }
 ];
 
@@ -166,6 +391,7 @@ const App: React.FC = () => {
   const [explanation, setExplanation] = useState<string>("");
   const [rewardImage, setRewardImage] = useState<string | null>(null);
   const [loadingReward, setLoadingReward] = useState(false);
+  const [showWinModal, setShowWinModal] = useState(false);
   
   // Track highest unlocked level (0-based index)
   const [unlockedLevel, setUnlockedLevel] = useState(0);
@@ -174,6 +400,7 @@ const App: React.FC = () => {
   useEffect(() => {
     setGameState(LEVELS[levelIndex]);
     setProgram([]);
+    setShowWinModal(false);
   }, [levelIndex]);
 
   // --- Story / Teacher Logic ---
@@ -197,7 +424,17 @@ const App: React.FC = () => {
 
   const addToProgram = (dir: Direction) => {
     if (isPlaying) return;
-    playClickSound();
+    
+    // Voice Feedback
+    let word = "";
+    switch(dir) {
+      case Direction.UP: word = "上"; break;
+      case Direction.DOWN: word = "下"; break;
+      case Direction.LEFT: word = "左"; break;
+      case Direction.RIGHT: word = "右"; break;
+    }
+    speakText(word);
+    
     setProgram(prev => [...prev, dir]);
   };
 
@@ -273,13 +510,9 @@ const App: React.FC = () => {
 
     if (levelIndex < LEVELS.length - 1) {
       playWinSound();
+      setShowWinModal(true); // Show animation
       const encouragement = getRandomPhrase(encouragingPhrases);
-      // Wait slightly for the win sound to sparkle before speaking
-      setTimeout(() => speakText(encouragement + " 下一关！"), 500);
-      
-      setTimeout(() => {
-        setLevelIndex(prev => prev + 1);
-      }, 2500);
+      setTimeout(() => speakText(encouragement), 200);
     } else {
       playVictorySound();
       speakText("哇！不可思议！你通关了所有30个关卡！你是超级程序员！");
@@ -290,6 +523,12 @@ const App: React.FC = () => {
       setRewardImage(img);
       setLoadingReward(false);
     }
+  };
+
+  const nextLevel = () => {
+    playClickSound();
+    setShowWinModal(false);
+    setLevelIndex(prev => prev + 1);
   };
 
   // --- Render Helpers ---
@@ -417,39 +656,36 @@ const App: React.FC = () => {
          <div className="w-24"></div> 
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full max-w-4xl">
+      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 w-full max-w-4xl">
          {LEVELS.map((_, index) => {
-           // Allow playing any level freely (requested by user previously), or use index <= unlockedLevel
-           const isUnlocked = true; 
-           
+           const isCompleted = index <= unlockedLevel; 
+           const isCurrent = index === levelIndex;
+
            return (
              <button
                key={index}
                onClick={() => {
-                 playClickSound();
-                 setLevelIndex(index);
-                 setCurrentScreen(Screen.GAME);
-                 setProgram([]);
+                  playClickSound();
+                  setLevelIndex(index);
+                  setCurrentScreen(Screen.GAME);
+                  setProgram([]);
                }}
                className={`
                  aspect-square rounded-3xl flex flex-col items-center justify-center gap-2 text-xl font-bold transition-all active:translate-y-2 active:shadow-none
-                 ${index === levelIndex ? 'ring-4 ring-pink-400' : ''}
-                 ${isUnlocked 
-                    ? 'bg-white text-purple-600 hover:bg-purple-50' 
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+                 ${isCurrent ? 'ring-4 ring-pink-400 bg-purple-50' : 'bg-white hover:bg-purple-50'}
+                 text-purple-600
                `}
                style={{ boxShadow: '0 6px 0 rgba(0,0,0,0.1)' }}
-               disabled={!isUnlocked}
              >
                <span className="text-3xl">{index + 1}</span>
-               {isUnlocked ? (
+               {isCompleted && index < unlockedLevel ? (
                  <div className="flex gap-1">
                    {[...Array(Math.min(3, Math.ceil(((index + 1) / 30) * 3)))].map((_, i) => (
                       <span key={i} className="text-yellow-400 text-xs">★</span>
                    ))}
                  </div>
                ) : (
-                  <span className="text-sm">🔒</span>
+                  <span className="text-sm opacity-50 text-pink-200">♥</span>
                )}
              </button>
            );
@@ -460,11 +696,10 @@ const App: React.FC = () => {
 
   const renderGame = () => (
     <div 
-      className="bg-blue-50 flex flex-col items-center p-4"
-      style={{ minHeight: '100dvh' }}
+      className="bg-blue-50 flex flex-col items-center p-4 relative min-h-screen overflow-x-hidden"
     >
       {/* Header */}
-      <div className="w-full max-w-4xl flex justify-between items-center mb-6 mt-4">
+      <div className="w-full max-w-6xl flex justify-between items-center mb-4 mt-2">
         <button onClick={() => {
           playClickSound();
           setCurrentScreen(Screen.LEVEL_SELECT);
@@ -482,17 +717,16 @@ const App: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8 items-start w-full max-w-5xl justify-center">
+      <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start w-full max-w-6xl justify-center z-10 px-0 md:px-4">
         
-        {/* The Grid */}
-        <div className="flex-1 w-full flex justify-center">
+        {/* The Grid Container - Responsive */}
+        <div className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl flex-shrink-0 flex justify-center">
            <GameGrid gameState={gameState} />
         </div>
 
-        {/* Controls */}
+        {/* Controls Container - Takes remaining space */}
         <div 
-          className="flex-1 w-full bg-white p-6 shadow-xl border-4 border-blue-100"
-          style={{ borderRadius: '2rem' }}
+          className="w-full max-w-lg lg:max-w-full lg:flex-1 bg-white p-4 md:p-6 shadow-xl border-4 border-blue-100 rounded-3xl"
         >
           <div className="mb-6">
              <div className="flex justify-between items-end mb-2">
@@ -521,13 +755,13 @@ const App: React.FC = () => {
             style={{ maxWidth: '300px' }}
           >
              <div />
-             <GameButton onClick={() => addToProgram(Direction.UP)} icon={<ArrowUp size={32} />} color="bg-orange-400" />
+             <GameButton onClick={() => addToProgram(Direction.UP)} icon={<ArrowUp size={32} />} color="bg-yellow-400" />
              <div />
-             <GameButton onClick={() => addToProgram(Direction.LEFT)} icon={<ArrowLeft size={32} />} color="bg-orange-400" />
+             <GameButton onClick={() => addToProgram(Direction.LEFT)} icon={<ArrowLeft size={32} />} color="bg-yellow-400" />
              <div />
-             <GameButton onClick={() => addToProgram(Direction.RIGHT)} icon={<ArrowRight size={32} />} color="bg-orange-400" />
+             <GameButton onClick={() => addToProgram(Direction.RIGHT)} icon={<ArrowRight size={32} />} color="bg-yellow-400" />
              <div />
-             <GameButton onClick={() => addToProgram(Direction.DOWN)} icon={<ArrowDown size={32} />} color="bg-orange-400" />
+             <GameButton onClick={() => addToProgram(Direction.DOWN)} icon={<ArrowDown size={32} />} color="bg-yellow-400" />
              <div />
           </div>
 
@@ -556,6 +790,35 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* WIN MODAL OVERLAY */}
+      {showWinModal && (
+        <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-[3rem] p-8 w-full max-w-sm flex flex-col items-center animate-pop-in border-8 border-yellow-300 shadow-2xl relative overflow-hidden">
+            {/* Confetti Background */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
+                <div className="absolute top-10 left-10 text-pink-500 animate-spin"><Star size={20} /></div>
+                <div className="absolute top-10 right-20 text-blue-500 animate-bounce"><Star size={30} /></div>
+                <div className="absolute bottom-20 left-1/2 text-yellow-500 animate-pulse"><Star size={40} /></div>
+            </div>
+
+            <div className="bg-yellow-100 p-6 rounded-full mb-4">
+              <Trophy className="w-16 h-16 text-yellow-500 animate-bounce" />
+            </div>
+            
+            <h2 className="text-4xl font-black text-purple-600 mb-2">太棒了！</h2>
+            <p className="text-gray-500 mb-8 text-center text-lg">你完成了第 {levelIndex + 1} 关！</p>
+            
+            <button 
+              onClick={nextLevel}
+              className="bg-green-500 hover:bg-green-400 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg active:scale-95 transition-transform flex items-center gap-2"
+            >
+               下一关 <ArrowRight />
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 

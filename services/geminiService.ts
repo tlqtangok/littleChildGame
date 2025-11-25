@@ -47,7 +47,20 @@ export const speakText = async (text: string) => {
       playAudioBuffer(audioBuffer);
     }
   } catch (error) {
-    console.error("TTS error:", error);
+    console.warn("Gemini TTS error (likely quota), switching to browser fallback:", error);
+    
+    // Fallback to native browser TTS
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      // Cancel any currently playing speech to prevent overlap during rapid clicks
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-CN'; // Set language to Chinese
+      utterance.rate = 0.9; // Slightly slower for children
+      utterance.pitch = 1.1; // Slightly friendlier pitch
+      
+      window.speechSynthesis.speak(utterance);
+    }
   }
 };
 
